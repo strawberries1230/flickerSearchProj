@@ -2,17 +2,18 @@
 //  FSNetworkManager.swift
 //  flickerSearch
 //
-//  Created by V D on 9/23/24.
+//  Created by Mian on 9/23/24.
 //
 
 import Foundation
 import Combine
-
+//actual & mock managers should confrom to the protocol
 protocol FSNetworkManagerProtocol {
     func request(baseUrlString: String, pathString: String?, httpMethod: FSNetworkManager.HTTPMethod, body: Data?, headers: [String: String]?, queryParam: [String: String]?) -> AnyPublisher<Data, Error>
 }
 
 class FSNetworkManager: NSObject, FSNetworkManagerProtocol {
+    //make it singleton
     static let shared = FSNetworkManager()
     private override init() {
         super.init()
@@ -30,6 +31,7 @@ class FSNetworkManager: NSObject, FSNetworkManagerProtocol {
         case badResponse
     }
     func request(baseUrlString: String, pathString: String?, httpMethod: HTTPMethod, body: Data?, headers: [String: String]?, queryParam: [String: String]?) -> AnyPublisher<Data, Error> {
+        //create url
         guard var urlComponents = URLComponents(string: baseUrlString + (pathString ?? "")) else {
             return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher()
         }
@@ -40,6 +42,7 @@ class FSNetworkManager: NSObject, FSNetworkManagerProtocol {
         guard let url = urlComponents.url else {
             return Fail(error: NetworkError.invalidURL).eraseToAnyPublisher()
         }
+        //make it a request
         var request = URLRequest(url: url)
         request.httpMethod = httpMethod.rawValue
         request.timeoutInterval = 10.0
@@ -52,8 +55,10 @@ class FSNetworkManager: NSObject, FSNetworkManagerProtocol {
             request.httpBody = body
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         }
+        //send request and return a publisher
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { (data, response) in
+                //preprocess it, if bad response, throw error
                 guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else{
                     throw NetworkError.badResponse
                 }

@@ -2,7 +2,7 @@
 //  FSItemDetailView.swift
 //  flickerSearch
 //
-//  Created by V D on 9/23/24.
+//  Created by Mian on 9/23/24.
 //
 
 import SwiftUI
@@ -32,18 +32,19 @@ struct FSItemDetailView: View {
                     .padding()
             }
             VStack(alignment: .leading) {
+                //title section
                 Text(item.title ?? "No Title")
                     .font(.headline)
                     .foregroundColor(.black)
-                
+                //author section
                 Text(extractedAuthor(from: item.author))
                     .font(.subheadline)
                     .foregroundColor(.black)
-                
+                //description section
                 Text(extractPlainText(from: item.description))
                     .font(.body)
                     .foregroundColor(.gray)
-                
+                //publishedDate section
                 Text(formatDate(from: item.publishedDate))
                     .font(.footnote)
                     .foregroundColor(.gray)
